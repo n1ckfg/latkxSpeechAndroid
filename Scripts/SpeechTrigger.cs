@@ -1,21 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class SpeechSayTrigger : MonoBehaviour {
+public class SpeechTrigger : MonoBehaviour {
 
-	public string[] triggerWords;
+    public LightningArtist latk;
+    public string result;
+    public bool isListening = false;
 
+    [HideInInspector] public bool armed = false;
 
-	private SpeechRecognizerManager _speechManager = null;
-	private bool _isListening = false;
-	private string _message = "";
-	private float markTime = 0f;
-	private bool hasBeenTriggered = false;
-	private float markTriggerTime = 0f;
-	private bool armMainTrigger = false;
-	private string rememberTriggerWord = "";
+    private SpeechRecognizerManager _speechManager = null;
+    private string countrySetting = "en-US";
+    private int numResults = 1;
 
-	private void Start() {
+    private void Start() {
 		if (Application.platform != RuntimePlatform.Android) {
 			Debug.Log ("Speech recognition is only available on Android platform.");
 			return;
@@ -30,8 +28,21 @@ public class SpeechSayTrigger : MonoBehaviour {
 		_speechManager = new SpeechRecognizerManager(gameObject.name);
 	}
 
+
+    private void Update() {
+        if (armed) {
+            switch (result) {
+                case "save":
+                    if (!latk.isWritingFile) latk.armWriteFile = true;
+                    break;
+            }
+
+            armed = false;
+        }
+    }
+
     private void OnDestroy() {
-		if (_speechManager != null)	_speechManager.Release ();
+		if (_speechManager != null)	_speechManager.Release();
 	}
 
 
@@ -50,19 +61,12 @@ public class SpeechSayTrigger : MonoBehaviour {
 	}
 
     private void OnSpeechResults (string results) {
-		_isListening = false;
+		isListening = false;
 
-		// Need to parse
 		string[] texts = results.Split (new string[] { SpeechRecognizerManager.RESULT_SEPARATOR }, System.StringSplitOptions.None);
-		result = texts[0];
+		result = texts[0].ToLower();
 
-		// ~ ~ ~ ~ ~
-		textMeshRen.enabled = true;
-		markTime = Time.realtimeSinceStartup;
-		textMesh.text = result;
-		// ~ ~ ~ ~ ~
-
-		Debug.Log ("Speech results:\n   " + string.Join ("\n   ", texts));
+        Debug.Log ("Speech results:\n   " + string.Join ("\n   ", texts));
 	}
 
     private void OnSpeechError (string error) {
@@ -101,17 +105,14 @@ public class SpeechSayTrigger : MonoBehaviour {
 			break;
 		}
 
-		_isListening = false;
+		isListening = false;
 	}
 
     public void startRecognizer() {
-        _speechManager.StartListening(1, "en-US"); // Use english and return maximum three results.
+        isListening = true;
+        _speechManager.StartListening(numResults, countrySetting); // Use english and return maximum three results.
         //_speechManager.StartListening(3, "en-US"); // Use english and return maximum three results.
         //_speechManager.StartListening (); // No parameters will use the device default language and returns maximum 5. results
     }
-
-    private void Update() {
-
-	}
 
 }
