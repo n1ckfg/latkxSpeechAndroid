@@ -13,6 +13,15 @@ public class SpeechTrigger : MonoBehaviour {
     private string countrySetting = "en-US";
     private int numResults = 1;
 
+    public void listen() {
+        if (!isListening) {
+            isListening = true;
+            _speechManager.StartListening(numResults, countrySetting);
+            //_speechManager.StartListening(3, "en-US"); // Use english and return maximum three results.
+            //_speechManager.StartListening (); // No parameters will use the device default language and returns maximum 5. results
+        }
+    }
+
     private void Start() {
 		if (Application.platform != RuntimePlatform.Android) {
 			Debug.Log ("Speech recognition is only available on Android platform.");
@@ -63,10 +72,12 @@ public class SpeechTrigger : MonoBehaviour {
     private void OnSpeechResults (string results) {
 		isListening = false;
 
-		string[] texts = results.Split (new string[] { SpeechRecognizerManager.RESULT_SEPARATOR }, System.StringSplitOptions.None);
-		result = texts[0].ToLower();
-
-        Debug.Log ("Speech results:\n   " + string.Join ("\n   ", texts));
+        try {
+            string[] texts = results.Split(new string[] { SpeechRecognizerManager.RESULT_SEPARATOR }, System.StringSplitOptions.None);
+            result = texts[0].ToLower();
+            armed = true;
+            Debug.Log("Speech results:\n   " + string.Join("\n   ", texts));
+        } catch (UnityException e) { }
 	}
 
     private void OnSpeechError (string error) {
@@ -107,12 +118,5 @@ public class SpeechTrigger : MonoBehaviour {
 
 		isListening = false;
 	}
-
-    public void startRecognizer() {
-        isListening = true;
-        _speechManager.StartListening(numResults, countrySetting); // Use english and return maximum three results.
-        //_speechManager.StartListening(3, "en-US"); // Use english and return maximum three results.
-        //_speechManager.StartListening (); // No parameters will use the device default language and returns maximum 5. results
-    }
 
 }
