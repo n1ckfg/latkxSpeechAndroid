@@ -11,7 +11,7 @@ public class SpeechTrigger : MonoBehaviour {
 
     private SpeechRecognizerManager _speechManager = null;
     private string countrySetting = "en-US";
-    private int numResults = 1;
+    private int numResults = 3;
 
     public void listen() {
         if (!isListening) {
@@ -30,6 +30,7 @@ public class SpeechTrigger : MonoBehaviour {
 
 		if (!SpeechRecognizerManager.IsAvailable ()) {
 			Debug.Log ("Speech recognition is not available on this device.");
+            latk.textMesh.text = "NO SPEECH";
 			return;
 		}
 
